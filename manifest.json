@@ -8,9 +8,9 @@
         "32": "icons/audio_icon32x32.png",
         "128": "icons/audio_icon128x128.png"
     },
-    "permissions": ["tabs"],
+    "permissions": ["tabs","storage"],
     "browser_action": {
-        "default_popup": "popup/mutesite.html"
+        "default_popup": "popup/popup_mutesite.html"
     },
     "content_scripts": [
         {
