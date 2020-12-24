@@ -1,35 +1,22 @@
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo,tab){
-    console.log(changeInfo);
     if(changeInfo.hasOwnProperty('status')){
         switch (changeInfo.status){
             case "loading":
                 //This will also include a url property within changeInfo
-                console.log("jango!:" + changeInfo.status);
                 //Check our host table block list
                 if( changeInfo.hasOwnProperty('url') ){
+                    console.log("Status:" + changeInfo.status+" URL:"+changeInfo.url);
+
                     //set Mute State to Unmuted which avoids have to pull status, check, then update. 
                     //Question becomes whether a read and check then *potential* write
                     //is more costly than a write no matter what. May just be negligible. 
-                    processBlockList(changeInfo.url, tabId);
-
+                    processFilter(changeInfo.url, tabId);
                 }
-                //Check tab muted state
-
-                //If bad site && not Muted ==> Mute
-                // if( inBlockList(changeInfo.url)){
-                //     muteTab(tabId);
-                // }
-                //If bad site && muted ==> Do nothing
-
-                //If good site && muted ==> UnMute
-
-                //If good site && not muted ==> Do nothing
                 break;
             case "complete":
-                console.log("boba!:" + changeInfo.status)
                 break;
             default:
-                console.log("general!:" + changeInfo.status)
+                console.log("General:" + changeInfo.status)
                 break;
         }
     }
@@ -88,23 +75,56 @@ function processBlockList(_url,_tabId){
     });
 }
 
-function getTabMuteState(){
+function processFilter(_url,_tabId){
+    var hostName = getHostName(_url);
+    //check against active tabs' hostnames to check for changing hostNames
+    //If changing hostnames, continue with processing. Otherwise, keep same mute state. 
+    //get hostName from localStorage Key/Value pair
+    chrome.storage.local.get([hostName], function(result){
+        if(!chrome.runtime.error){
+            //no error finding the key in our table storage:
+            //why does [hostName] work and not result.hostName?
+            //->because hostName is not a property/field of result
+            if(result[hostName] == "block"){
+                muteTab(_tabId);
+            }else{
+                //essentially: "allow"
+                unMuteTab(_tabId)
+            }
+        }else{
+            //no result found so we are going to mute.
+            unMuteTab(_tabId);
+        }
+    });
+}
+
+function isChangingHostNames(_tabId, _newUrl){
 
 }
 
-// function addToBlockList(hostName){
-//     chrome.storage.local.set({hostName:"block"},function(){
-//         console.log("Block value is set to block");
-//     });
-// }
+function getTabMuteState(){
 
-// function addToAllowList(hostName){
-//     chrome.storage.local.set({hostName:"allow"},function(){
-//         console.log('value is set to allow');
-//     });
-// }
+}
 
 chrome.storage.onChanged.addListener(function(what,area){
     console.log(what);
     console.log(area);
 })
+
+chrome.windows.onCreated.addListener(function(window){
+    if(window.hasOwnProperty("tabs")){
+        console.log("we have tabs!");
+        console.log(window);
+    }else{
+        console.log("we don't have tabs!");
+        console.log(window);
+
+        if(window.type == "normal" && window.incognito == false){
+            //Do our setup. We don't do setup in popups, devtools, nor incognito windows.
+            //New windows do not seem to have tabs if created from scratch even with "default tab"
+            //New windows will only have tabs if window is created from "open tab in new window"
+        }
+    }
+});
+
+var tabCollection = new Map();
