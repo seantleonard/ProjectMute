@@ -1,4 +1,7 @@
-    "img_src":"https://www.iconarchive.com/show/tulliana-2-icons-by-umut-pulat/arts-builder-icon.html",
+   
+   A Chromium extension to mute annoying sites that auto play media content. The extension maintains 
+   
+   "img_src":"https://www.iconarchive.com/show/tulliana-2-icons-by-umut-pulat/arts-builder-icon.html",
 
     https://stackoverflow.com/questions/3689423/google-chrome-plugin-how-to-get-domain-from-url-tab-url
 
